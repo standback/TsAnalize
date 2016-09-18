@@ -10,10 +10,8 @@ def Tshelp():
 		TsRunging.py  [--options] [TsPath]
 		options:
 			--PCR=[pcrPid] 	dumpPCR value from packet which pid=pcrPid
-			--VPTS=[vPid]	dump Video PTS from packet which pid=vPid
-			--APTS=[aPid]	dump Audio PTS from packet which pid=aPid
-			--vDump=[vPid] dump Video Data from packet which pid=vPid
-			--aDump=[aPid] dump Audio Data from packet which pid=aPid
+			--pts=[Pid]	dump PTS from packet which pid=Pid
+			--dumpes=[Pid] dump es Data from packet which pid=Pid
 		===============================================================
 		'''
 
