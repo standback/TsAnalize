@@ -1,4 +1,8 @@
 #!/usr/bin/python
+#this is open source application ,
+#@all copyright reserved
+#@author: jason_wang@realsil.com.cn
+#
 import sys
 from TsConfig import TsConfig
 from TsManager import TsManager

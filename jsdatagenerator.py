@@ -1,4 +1,9 @@
 #!/usr/bin/python
+#this is open source application ,
+#
+#@Copyright(c) 2014 jason_wang, 
+#@author: jason_wang@realsil.com.cn
+#
 import sys
 print(sys.argv)
 ux=0

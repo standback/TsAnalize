@@ -1,3 +1,7 @@
+#this is open source application ,
+#@all copyright reserved
+#@author: jason_wang@realsil.com.cn
+#
 import io
 import os
 import string
