@@ -11,7 +11,7 @@ def getdataFromFile(file):
 	print(file+':'+str(len(data)))
 	return data
 	
-def writeJsDataToFile(datas,upper):
+def writeJsDataToFile(datas,base,upper):
 	with open("html5-svg-multi-line-chart/data/data.js",'w') as wf:
 		wf.write('var data = 	[')
 		for item in datas:
@@ -22,6 +22,7 @@ def writeJsDataToFile(datas,upper):
 			
 		wf.write('\n];\n')
 		wf.write("var coord=["+str(upper[0])+','+str(upper[1])+"];\n")
+		wf.write("var ptsBase="+str(base)+";\n")
 		wf.close()
 
 def shiftPtsData(datas):
@@ -35,11 +36,14 @@ def shiftPtsData(datas):
 	for item in datas:
 		for data in item:
 			data[1]=int(data[1]) - base
+	print ("ptsBase:"+str(base))
+	return base
 			
 def findUppercordinator(datas):
 	ux =0
 	uy=0
 	for item in datas:
+		print(item[0])
 		for data in item:
 			if ux<int(data[0]):
 				ux= int(data[0])
@@ -54,8 +58,7 @@ def processPtsDataForJsShow(files):
 		data = getdataFromFile(item)
 		datas.append(data)
 	print("--------")
-	shiftPtsData(datas)
-	writeJsDataToFile(datas,findUppercordinator(datas))
+	writeJsDataToFile(datas,shiftPtsData(datas),findUppercordinator(datas))
 
 def main():
 	if len(sys.argv)<2:

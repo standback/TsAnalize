@@ -85,6 +85,15 @@ svg.append("clipPath")
 	.attr("height", height);
 	
 	
+var position = svg.append("g")
+	.attr("class", "cursor_info")
+	.append("text")
+	.attr("class", "axis-label")
+	.attr("y",height+30)
+	.attr("x", width-200)
+	.text('postion:');	
+	
+	
 	
 	
 	
@@ -118,7 +127,7 @@ var points = svg.selectAll('.dots')
 	.enter()
 	.append("g")
     .attr("class", "dots")
-	.attr("clip-path", "url(#clip)");	
+	.attr("clip-path", "url(#clip)")
  
 points.selectAll('.dot')
 	.data(function(d, index){ 		
@@ -131,17 +140,12 @@ points.selectAll('.dot')
 	.enter()
 	.append('circle')
 	.attr('class','dot')
-	.attr("r", 2.5)
+	.attr("r", 1)
 	.attr('fill', function(d,i){ 	
 		return colors[d.index%colors.length];
 	})	
-	.attr("transform", function(d) { 
-		return "translate(" + x(d.point.x) + "," + y(d.point.y) + ")"; }
-	);
-	
- 
-	
-	
+	.attr("transform", function(d) { return "translate(" + x(d.point.x) + "," + y(d.point.y) + ")"; })
+	.on("mouseover",dotFocus );
 	
 	
 //************************************************************
@@ -156,3 +160,8 @@ function zoomed() {
 		return "translate(" + x(d.point.x) + "," + y(d.point.y) + ")"; }
 	);  
 }
+
+function dotFocus(d,i){
+		pts = (d.point.y)+ptsBase;
+		position.text("position:(" + (d.point.x) + "," + pts+ ")");
+	}

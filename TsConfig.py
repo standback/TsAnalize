@@ -5,13 +5,14 @@ class TsConfig:
 		self.filePath = ''
 	def config(self,clist):
 		self.configs.clear();
+		ret = -1
 		for param in clist:
 			if param.startswith("--") :
 				ret =self.parseParam(param)
 			else :
 				ret =self.filePath = param;
 		if len(self.filePath) == 0 :
-			print "Please Input Filepath"
+			print ("Please Input Filepath")
 		return ret 
 	def parseParam(self, param):
 		if ('=' in param):
@@ -20,20 +21,20 @@ class TsConfig:
 			svalue = ce[2]
 			sitem = ce[0]
 		else :
-			print "[waring] can not recognize param:",param
+			print ("[waring] can not recognize param:",param)
 			return -1;
 
 		value = int(svalue)
 		item = sitem.lstrip('-')
 		if item.lower() not in SParam :
-			print "[waring] unrecognize config: ",item
+			print ("[waring] unrecognize config: ",item)
 			return -1;
 		if value in self.configs:
 			self.configs[value][item] = True
 		else :
 			self.configs[value] = dict()
 			self.configs[value][item.lower()]=True
-		print self.configs
+		print (self.configs)
 		return 0
 	def getCurrentFile(self):
 		return self.filePath

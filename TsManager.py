@@ -2,7 +2,8 @@ import io
 import os
 import string
 import time
-from exceptions import IOError
+from jsdatagenerator import processPtsDataForJsShow
+#from exceptions import IOError
 class TsManager:
 	def __init__(self, config):
 		self.config=config
@@ -28,8 +29,8 @@ class TsManager:
 				for subitem in lconfig[item] :
 					filename = time.strftime('%m%d%H%M%S',time.localtime())+'_'+os.path.splitext(os.path.basename(tsFile))[0]+'_'+subitem+'_'+str(hex(item))
 					self.files[item][subitem]= open("output/"+filename,"w")	
-		except IOError,ioe:
-			print  ioe
+		except IOError as ioe:
+			print  (ioe)
 #	print self.files
 
 	def destroyFiles(self):
@@ -41,8 +42,8 @@ class TsManager:
 					for subkey in self.files[key] :
 						if subkey != 'context':
 							self.files[key][subkey].close()
-		except IOError,ioe:
-			print ioe
+		except IOError as ioe:
+			print (ioe)
 		self.files.clear()
 #		print self.files
 
@@ -70,15 +71,15 @@ class TsManager:
 						break;
 
 					if(ord(self.dataBuffer[self.files["TsFile"]["context"]["offset"]+188])== 0x47):
-						print "changePacketSize:188"
+						print ("changePacketSize:188")
 						self.packetSize= 188
 						break
 					elif (ord(self.dataBuffer[self.files["TsFile"]["context"]["offset"]+192])== 0x47):
-						print "changePacketSize:192"
+						print ("changePacketSize:192")
 						self.packetSize= 192
 						break
 					elif (ord(self.dataBuffer[self.files["TsFile"]["context"]["offset"]+204])== 0x47):
-						print "changePacketSize:204"
+						print ("changePacketSize:204")
 						self.packetSize= 204
 						break
 					else :
@@ -94,7 +95,7 @@ class TsManager:
 
 	def saveData(self,value):
 		if value[1]=='PTS':
-			value[0].write(str(hex(value[2]))+'\n')
+			value[0].write(str(value[3])+"\t"+str(value[2])+'\n')
 		elif value[1] =='DATA':
 			value[0].write(value[2])
 
@@ -117,7 +118,7 @@ class TsManager:
 					for it in self.dataBuffer[packetOffset+2:packetOffset+7] :
 						pcr = (pcr<<8) + ord(it)
 					pcr = pcr >>7
-					result = (Ccig["pcr"],"PTS",pcr)
+					result = (Ccig["pcr"],"PTS",pcr, (self.files["TsFile"]["file"].tell()-self.files["TsFile"]["context"]["offset"]))
 					self.saveData(result)
 			packetOffset += adaptation_length+1
 		
@@ -126,7 +127,7 @@ class TsManager:
 			if ord(self.dataBuffer[packetOffset])==0x00 and ord(self.dataBuffer[packetOffset+1])==0x00 and ord(self.dataBuffer[packetOffset+2])==0x01 :
 				Ccig['context']['bufferData'] = self.dataBuffer[packetOffset: self.files["TsFile"]["context"]["offset"]+188]
 		elif Ccig['context']['bufferData'] != '':
-			print "xxx"
+			print ("xxx")
 			Ccig['context']['bufferData'] = Ccig['context']['bufferData']+self.dataBuffer[packetOffset: self.files["TsFile"]["context"]["offset"]+188]
 		else:
 			if 'dumpes' in Ccig :
@@ -141,10 +142,9 @@ class TsManager:
 					pts = pts +((ord(self.dataBuffer[packetOffset+11]) &0xfe) <<14)
 					pts = pts + (ord(self.dataBuffer[packetOffset+12])<<7)
 					pts = pts + (ord(self.dataBuffer[packetOffset+13]) & 0xfe >>1)
-					result = (Ccig['pts'], 'PTS', pts)
+					result = (Ccig['pts'], 'PTS', pts, (self.files["TsFile"]["file"].tell()-self.files["TsFile"]["context"]["offset"]))
 					self.saveData(result)
 			if 'dumpes' in Ccig:
-				print str(hex(ord(Ccig['context']['bufferData'][8])))+'-'+str(len(Ccig['context']['bufferData']))
 				#for i in Ccig['context']['bufferData']:
 				#	print str(hex(ord(i)))
 
@@ -177,11 +177,20 @@ class TsManager:
 				break;
 			self.handleData()
 		
-		print "------------"+ self.files['TsFile']['file'].name+'-----------------'
+		print ("------------"+ self.files['TsFile']['file'].name+'-----------------')
 		for i in self.files:
 			if i !='TsFile':
 				for subkey in self.files[i]:
 					if subkey != 'context':
-						print str(i)+'  '+subkey+' :'+self.files[i][subkey].name
+						print (str(i)+'  '+subkey+' :'+self.files[i][subkey].name)
+
+		files = list()
+		for i in self.files:
+			if i !='TsFile':
+				for subkey in self.files[i]:
+					if (subkey != 'context')  and (("pcr" == subkey) or ("pts" == subkey)) :
+						files.append(self.files[i][subkey].name)
+		self.destroyFiles()
+		processPtsDataForJsShow(files)
 		return 0
 		
