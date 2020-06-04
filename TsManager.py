@@ -145,7 +145,7 @@ class TsManager:
 					pts = pts +(ord(self.dataBuffer[packetOffset+10])<< 22)
 					pts = pts +((ord(self.dataBuffer[packetOffset+11]) &0xfe) <<14)
 					pts = pts + (ord(self.dataBuffer[packetOffset+12])<<7)
-					pts = pts + (ord(self.dataBuffer[packetOffset+13]) & 0xfe >>1)
+					pts = pts + ((ord(self.dataBuffer[packetOffset+13]) & 0xfe) >>1)
 					result = (Ccig['pts'], 'PTS', pts, (self.files["TsFile"]["file"].tell()-self.files["TsFile"]["context"]["offset"]))
 					self.saveData(result)
 			if 'dumpes' in Ccig:
