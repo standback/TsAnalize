@@ -1,4 +1,4 @@
-SParam= ('pcr','pts','dumpes')
+SParam= ('pcr','pts','dumpes','dumptsp')
 class TsConfig:
 	def __init__(self):
 		self.configs = dict()

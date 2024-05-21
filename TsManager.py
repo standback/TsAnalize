@@ -27,24 +27,33 @@ class TsManager:
 			self.files["TsFile"]["file"]=open(tsFile,"rb")
 
 			lconfig = self.config.getCurrentConfig()
+                        self.files['dumptsp'] = ''
 			for item in lconfig :
 				self.files[item] = dict()
 				self.files[item]["context"] = {'cc':-1, 'bufferData':'', 'ccErrorCount':0}
 				for subitem in lconfig[item] :
-					filename = time.strftime('%m%d%H%M%S',time.localtime())+'_'+os.path.splitext(os.path.basename(tsFile))[0]+'_'+subitem+'_'+str(hex(item))
-					self.files[item][subitem]= open("output/"+filename,"w")	
+                                        if subitem == 'dumptsp':
+                                            if self.files['dumptsp']=='':
+                                                filename = time.strftime('%m%d%H%M%S',time.localtime())+'_'+os.path.splitext(os.path.basename(tsFile))[0]+'_'+subitem
+                                                self.files['dumptsp'] = open("output/"+filename,"w")
+                                            self.files[item][subitem] = ''
+                                        else:
+					    filename = time.strftime('%m%d%H%M%S',time.localtime())+'_'+os.path.splitext(os.path.basename(tsFile))[0]+'_'+subitem+'_'+str(hex(item))
+					    self.files[item][subitem]= open("output/"+filename,"w")	
 		except IOError as ioe:
 			print  (ioe)
-#	print self.files
+		print(self.files)
 
 	def destroyFiles(self):
 		try:
 			for key in self.files:
 				if key=="TsFile" :
 					self.files[key]['file'].close()
+                                elif self.files['dumptsp'] !='':
+                                        self.files['dumptsp'].close();
 				else :
 					for subkey in self.files[key] :
-						if subkey != 'context':
+						if subkey != 'context' and subkey !='dumptsp':
 							self.files[key][subkey].close()
 		except IOError as ioe:
 			print (ioe)
@@ -102,8 +111,14 @@ class TsManager:
 			value[0].write(str(value[3])+"\t"+str(value[2])+'\n')
 		elif value[1] =='DATA':
 			value[0].write(value[2])
+                elif value[1] == 'TSP':
+                        value[0].write(value[2])
 
 	def ParseData(self, Ccig):
+                #dump ts
+                if ("dumptsp" in Ccig):
+                    result = (self.files["dumptsp"], "TSP",  self.dataBuffer[ self.files["TsFile"]["context"]["offset"] : self.files["TsFile"]["context"]["offset"]+188])
+                    self.saveData(result)
 		packetOffset = self.files["TsFile"]["context"]["offset"]
 		isStartUnit = ord(self.dataBuffer[packetOffset +1]) &0x40
 
@@ -146,8 +161,8 @@ class TsManager:
 					pts = pts +((ord(self.dataBuffer[packetOffset+11]) &0xfe) <<14)
 					pts = pts + (ord(self.dataBuffer[packetOffset+12])<<7)
 					pts = pts + ((ord(self.dataBuffer[packetOffset+13]) & 0xfe) >>1)
-					result = (Ccig['pts'], 'PTS', pts, (self.files["TsFile"]["file"].tell()-self.files["TsFile"]["context"]["offset"]))
-					self.saveData(result)
+					result = (Ccig['pts'], 'PTS', pts, (self.files["TsFile"]["file"].tell()-self.files["TsFile"]["context"]["offset"])) 
+                                        self.saveData(result)
 			if 'dumpes' in Ccig:
 				#for i in Ccig['context']['bufferData']:
 				#	print str(hex(ord(i)))
@@ -183,16 +198,16 @@ class TsManager:
 		
 		print ("------------"+ self.files['TsFile']['file'].name+'-----------------')
 		for i in self.files:
-			if i !='TsFile':
+			if i !='TsFile' and i != 'dumptsp':
 				for subkey in self.files[i]:
-					if subkey != 'context':
+					if subkey != 'context' and subkey != 'dumptsp':
 						print (str(i)+'  '+subkey+' :'+self.files[i][subkey].name)
 
 		files = list()
 		for i in self.files:
-			if i !='TsFile':
+                    if i !='TsFile' and i != 'dumptsp':
 				for subkey in self.files[i]:
-					if (subkey != 'context')  and (("pcr" == subkey) or ("pts" == subkey)) :
+					if (subkey != 'context') and subkey != 'dumptsp'  and (("pcr" == subkey) or ("pts" == subkey)) :
 						files.append(self.files[i][subkey].name)
 		self.destroyFiles()
 		processPtsDataForJsShow(files)
